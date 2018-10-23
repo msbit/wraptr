@@ -43,6 +43,12 @@ int main(int argc, char **argv) {
   w1->DoStuff();
   w2->DoStuff();
 
+  {
+    printf(" main: copying Child in separate scope\n");
+    wraptr<Child> w3 = w1;
+    w3->DoStuff();
+  }
+
   printf(" main: about to return\n");
   return 0;
 }
@@ -52,14 +58,17 @@ This outputs something like:
 
 ```
  main: creating and wrapping Child automatically
-child: created (0x558a53783280)
+child: created (0x560688621280)
  main: creating and wrapping Child explicitly
-child: created (0x558a537832a0)
-child: doing stuff (0x558a53783280)
-child: doing stuff (0x558a537832a0)
+child: created (0x5606886212a0)
+child: doing stuff (0x560688621280)
+child: doing stuff (0x5606886212a0)
+ main: copying Child in separate scope
+child: doing stuff (0x560688621280)
+child: destroying (0x560688621280)
  main: about to return
-child: destroying (0x558a537832a0)
-child: destroying (0x558a53783280)
+child: destroying (0x5606886212a0)
+child: destroying (0x560688621280)
 ```
 
 showing that the `Child` instances are destroyed when the wrapping `wraptr` leaves scope.
