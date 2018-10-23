@@ -18,7 +18,7 @@ public:
   void DoStuff();
 };
 
-Child::Child() { printf("child: created (%p)\n", this); }
+Child::Child() { printf("child: creating (%p)\n", this); }
 
 Child::~Child() { printf("child: destroying (%p)\n", this); }
 
