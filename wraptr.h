@@ -5,8 +5,8 @@ private:
   int count;
 
 public:
-  int Retain() { return ++this->count; }
-  int Release() { return --this->count; }
+  int Retain() { return ++count; }
+  int Release() { return --count; }
 };
 
 template <class T> class wraptr {
@@ -31,18 +31,18 @@ public:
   ~wraptr();
 
   // class member access operator overload
-  T *operator->() { return this->raw; }
+  T *operator->() { return raw; }
 
   // copy assignment operator overload
   wraptr<T> &operator=(const wraptr<T> &other) {
     if (this != &other) {
-      if (this->refCount->Release() == 0) {
-        delete this->raw;
-        delete this->refCount;
+      if (refCount->Release() == 0) {
+        delete raw;
+        delete refCount;
       }
-      this->raw = other.raw;
-      this->refCount = other.refCount;
-      this->refCount->Retain();
+      raw = other.raw;
+      refCount = other.refCount;
+      refCount->Retain();
     }
     return *this;
   }
@@ -50,12 +50,12 @@ public:
   // move assignment operator overload
   wraptr<T> &operator=(wraptr<T> &&other) {
     if (this != &other) {
-      if (this->refCount->Release() == 0) {
-        delete this->raw;
-        delete this->refCount;
+      if (refCount->Release() == 0) {
+        delete raw;
+        delete refCount;
       }
-      this->raw = other.raw;
-      this->refCount = other.refCount;
+      raw = other.raw;
+      refCount = other.refCount;
       other.raw = nullptr;
       other.refCount = nullptr;
     }
@@ -69,14 +69,14 @@ template <class T> wraptr<T>::wraptr() : wraptr<T>::wraptr(new T()) {}
 // wrapping constructor definition
 template <class T>
 wraptr<T>::wraptr(T *raw) : raw(raw), refCount(new RefCount()) {
-  this->refCount->Retain();
+  refCount->Retain();
 }
 
 // copy constructor definition
 template <class T>
 wraptr<T>::wraptr(const wraptr<T> &other)
     : raw(other.raw), refCount(other.refCount) {
-  this->refCount->Retain();
+  refCount->Retain();
 }
 
 // move constructor definition
@@ -89,8 +89,7 @@ wraptr<T>::wraptr(wraptr<T> &&other)
 
 // destructor definition
 template <class T> wraptr<T>::~wraptr() {
-  if (this->refCount != nullptr && this->raw != nullptr &&
-      this->refCount->Release() == 0) {
-    delete this->raw;
+  if (refCount != nullptr && raw != nullptr && refCount->Release() == 0) {
+    delete raw;
   }
 }
