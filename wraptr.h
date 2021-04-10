@@ -28,10 +28,8 @@ public:
 
   // move constructor
   wraptr(wraptr<T> &&other)
-      : raw(std::move(other.raw)), rc(std::move(other.rc)) {
-    other.raw = nullptr;
-    other.rc = nullptr;
-  }
+      : raw(std::exchange(other.raw, nullptr)),
+        rc(std::exchange(other.rc, nullptr)) {}
 
   // destructor
   ~wraptr() {
@@ -64,10 +62,8 @@ public:
         delete raw;
         delete rc;
       }
-      raw = other.raw;
-      rc = other.rc;
-      other.raw = nullptr;
-      other.rc = nullptr;
+      std::swap(raw, other.raw);
+      std::swap(rc, other.rc);
     }
     return *this;
   }
