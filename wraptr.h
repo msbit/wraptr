@@ -15,20 +15,30 @@ private:
   RefCount *refCount;
 
 public:
-  // default constructor declaration
-  wraptr();
+  // default constructor
+  wraptr() : wraptr(new T()) {}
 
-  // wrapping constructor declaration
-  wraptr(T *raw);
+  // wrapping constructor
+  wraptr(T *raw) : raw(raw), refCount(new RefCount()) { refCount->Retain(); }
 
-  // copy constructor declaration
-  wraptr(const wraptr<T> &other);
+  // copy constructor
+  wraptr(const wraptr<T> &other) : raw(other.raw), refCount(other.refCount) {
+    refCount->Retain();
+  }
 
-  // move constructor declaration
-  wraptr(wraptr<T> &&other);
+  // move constructor
+  wraptr(wraptr<T> &&other)
+      : raw(std::move(other.raw)), refCount(std::move(other.refCount)) {
+    other.raw = nullptr;
+    other.refCount = nullptr;
+  }
 
-  // destructor declaration
-  ~wraptr();
+  // destructor
+  ~wraptr() {
+    if (refCount != nullptr && raw != nullptr && refCount->Release() == 0) {
+      delete raw;
+    }
+  }
 
   // class member access operator overload
   T *operator->() { return raw; }
@@ -62,34 +72,3 @@ public:
     return *this;
   }
 };
-
-// default constructor definition
-template <class T> wraptr<T>::wraptr() : wraptr<T>::wraptr(new T()) {}
-
-// wrapping constructor definition
-template <class T>
-wraptr<T>::wraptr(T *raw) : raw(raw), refCount(new RefCount()) {
-  refCount->Retain();
-}
-
-// copy constructor definition
-template <class T>
-wraptr<T>::wraptr(const wraptr<T> &other)
-    : raw(other.raw), refCount(other.refCount) {
-  refCount->Retain();
-}
-
-// move constructor definition
-template <class T>
-wraptr<T>::wraptr(wraptr<T> &&other)
-    : raw(std::move(other.raw)), refCount(std::move(other.refCount)) {
-  other.raw = nullptr;
-  other.refCount = nullptr;
-}
-
-// destructor definition
-template <class T> wraptr<T>::~wraptr() {
-  if (refCount != nullptr && raw != nullptr && refCount->Release() == 0) {
-    delete raw;
-  }
-}
