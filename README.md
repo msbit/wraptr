@@ -6,80 +6,75 @@ Basically just a chance for me to look into some C++ operator overloads and temp
 
 ### Example
 
-Given a `Child` class defined in `Child.h` like so:
+Given a `child` class defined in `child.h` like so:
 
 ```c++
-#include <stdio.h>
+#include <cstdio>
 
-class Child {
-public:
-  Child();
-  ~Child();
-  void DoStuff();
+struct child {
+  child() { printf("child: creating (%p)\n", this); }
+
+  ~child() { printf("child: destroying (%p)\n", this); }
+
+  void do_stuff() { printf("child: doing stuff (%p)\n", this); }
 };
-
-Child::Child() { printf("child: creating (%p)\n", this); }
-
-Child::~Child() { printf("child: destroying (%p)\n", this); }
-
-void Child::DoStuff() { printf("child: doing stuff (%p)\n", this); }
 ```
 
-we can wrap the raw `Child` pointer in a `wraptr` like so:
+we can wrap the raw `child` pointer in a `wraptr` like so:
 
 ```c++
-#include <stdio.h>
+#include <cstdio>
 
 #include "child.h"
 #include "wraptr.h"
 
-wraptr<Child> get(wraptr<Child> a) { return a; }
+wraptr<child> get(wraptr<child> a) { return a; }
 
 int main(int argc, char **argv) {
   printf(" main: creating and wrapping (automatic)\n");
-  wraptr<Child> w1;
-  w1->DoStuff();
+  wraptr<child> w1;
+  w1->do_stuff();
 
   printf(" main: creating and wrapping (explicit)\n");
-  wraptr<Child> w2(new Child());
-  w2->DoStuff();
+  wraptr<child> w2(new child());
+  w2->do_stuff();
 
   printf(" main: copy construct\n");
-  wraptr<Child> w3 = w1;
-  w3->DoStuff();
+  wraptr<child> w3 = w1;
+  w3->do_stuff();
 
   printf(" main: move construct\n");
-  wraptr<Child> w4 = get(w1);
-  w4->DoStuff();
+  wraptr<child> w4 = get(w1);
+  w4->do_stuff();
 
   printf(" main: copy assignment\n");
-  wraptr<Child> w5;
+  wraptr<child> w5;
   w5 = w1;
-  w5->DoStuff();
+  w5->do_stuff();
 
   printf(" main: move assignment\n");
-  wraptr<Child> w6;
+  wraptr<child> w6;
   w6 = get(w1);
-  w6->DoStuff();
+  w6->do_stuff();
 
   {
     printf(" main: copy construct (separate scope)\n");
-    wraptr<Child> w7 = w1;
-    w7->DoStuff();
+    wraptr<child> w7 = w1;
+    w7->do_stuff();
 
     printf(" main: move construct (separate scope)\n");
-    wraptr<Child> w8 = get(w1);
-    w8->DoStuff();
+    wraptr<child> w8 = get(w1);
+    w8->do_stuff();
 
     printf(" main: copy assignment (separate scope)\n");
-    wraptr<Child> w9;
+    wraptr<child> w9;
     w9 = w1;
-    w9->DoStuff();
+    w9->do_stuff();
 
     printf(" main: move assignment (separate scope)\n");
-    wraptr<Child> w10;
+    wraptr<child> w10;
     w10 = get(w1);
-    w10->DoStuff();
+    w10->do_stuff();
   }
 
   printf(" main: about to return\n");
@@ -125,7 +120,7 @@ child: destroying (0x55f3ca5a1ec0)
 child: destroying (0x55f3ca5a1e80)
 ```
 
-showing that the `Child` instances are destroyed when the wrapping `wraptr` leaves scope, and that each of the "Rule of Five" methods are implemented:
+showing that the `child` instances are destroyed when the wrapping `wraptr` leaves scope, and that each of the ["Rule of Five"](https://cpppatterns.com/patterns/rule-of-five.html) methods are implemented:
 
 * destructor
 * copy constructor
