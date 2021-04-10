@@ -1,41 +1,41 @@
 #include <utility>
 
-class RefCount {
+class ref_count {
 private:
   int count;
 
 public:
-  int Retain() { return ++count; }
-  int Release() { return --count; }
+  int retain() { return ++count; }
+  int release() { return --count; }
 };
 
 template <class T> class wraptr {
 private:
   T *raw;
-  RefCount *refCount;
+  ref_count *rc;
 
 public:
   // default constructor
   wraptr() : wraptr(new T()) {}
 
   // wrapping constructor
-  wraptr(T *raw) : raw(raw), refCount(new RefCount()) { refCount->Retain(); }
+  wraptr(T *raw) : raw(raw), rc(new ref_count()) { rc->retain(); }
 
   // copy constructor
-  wraptr(const wraptr<T> &other) : raw(other.raw), refCount(other.refCount) {
-    refCount->Retain();
+  wraptr(const wraptr<T> &other) : raw(other.raw), rc(other.rc) {
+    rc->retain();
   }
 
   // move constructor
   wraptr(wraptr<T> &&other)
-      : raw(std::move(other.raw)), refCount(std::move(other.refCount)) {
+      : raw(std::move(other.raw)), rc(std::move(other.rc)) {
     other.raw = nullptr;
-    other.refCount = nullptr;
+    other.rc = nullptr;
   }
 
   // destructor
   ~wraptr() {
-    if (refCount != nullptr && raw != nullptr && refCount->Release() == 0) {
+    if (rc != nullptr && raw != nullptr && rc->release() == 0) {
       delete raw;
     }
   }
@@ -46,13 +46,13 @@ public:
   // copy assignment operator overload
   wraptr<T> &operator=(const wraptr<T> &other) {
     if (this != &other) {
-      if (refCount->Release() == 0) {
+      if (rc->release() == 0) {
         delete raw;
-        delete refCount;
+        delete rc;
       }
       raw = other.raw;
-      refCount = other.refCount;
-      refCount->Retain();
+      rc = other.rc;
+      rc->retain();
     }
     return *this;
   }
@@ -60,14 +60,14 @@ public:
   // move assignment operator overload
   wraptr<T> &operator=(wraptr<T> &&other) {
     if (this != &other) {
-      if (refCount->Release() == 0) {
+      if (rc->release() == 0) {
         delete raw;
-        delete refCount;
+        delete rc;
       }
       raw = other.raw;
-      refCount = other.refCount;
+      rc = other.rc;
       other.raw = nullptr;
-      other.refCount = nullptr;
+      other.rc = nullptr;
     }
     return *this;
   }
